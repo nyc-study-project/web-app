@@ -42,10 +42,15 @@ const defaultConfig = {
     },
     {
       name: "Reviews & Ratings (Swagger-first, port 8003)",
-      baseUrl: "http://34.139.134.144:8003",
+      baseUrl: "/reviews",
       notes: "Defined with Swagger; implement later.",
-      apiDocsUrl: "",
-      endpoints: [{ label: "/health", path: "/health" }],
+      apiDocsUrl: "/reviews/docs#/",          // optional top link (keeps it simple)
+      endpoints: [
+        { label: "Docs (Swagger)", path: "/docs#/" },  // <— RELATIVE path
+        { label: "/health",         path: "/health" },
+        { label: "OpenAPI JSON", path: "/openapi.json"},
+        { label: "Back to Home", path: "/"}
+      ],
     },
   ],
   database: {
