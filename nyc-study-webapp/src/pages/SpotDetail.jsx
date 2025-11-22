@@ -1,30 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { SPOTS_BASE, REVIEWS_BASE } from "../api/config";
+import { COMPOSITE_BASE } from "../api/config";
 
 export default function SpotDetail() {
   const { id } = useParams();
   const [spot, setSpot] = useState(null);
   const [reviews, setReviews] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       try {
-        // Load spot detail
-        const res = await fetch(`${SPOTS_BASE}/studyspots/${id}`);
+        const res = await fetch(`${COMPOSITE_BASE}/composite/spots/${id}/full`);
         const json = await res.json();
-        setSpot(json.data);
 
-        // Load reviews
-        const r = await fetch(`${REVIEWS_BASE}/reviews/${id}`);
-        const rjson = await r.json();
-        setReviews(rjson.reviews || []);
+        setSpot(json.spot);
+        setReviews(json.reviews || []);
+        setUsers(json.users || []);
       } catch (e) {
         console.error("Error:", e);
       }
       setLoading(false);
     }
+
     load();
   }, [id]);
 
@@ -53,7 +52,6 @@ export default function SpotDetail() {
         </ul>
       </div>
 
-      {/* Reviews */}
       <div className="space-y-2">
         <h2 className="text-xl font-medium">Reviews</h2>
         {reviews.length === 0 ? (
@@ -61,8 +59,8 @@ export default function SpotDetail() {
         ) : (
           reviews.map((rev, index) => (
             <div key={index} className="p-3 border rounded-lg">
-              <p className="font-semibold">Rating: {rev.rating}/5</p>
-              <p className="text-sm">{rev.comment}</p>
+              <p className="font-semibold">Rating: {rev.rating || "?"}/5</p>
+              <p className="text-sm">{rev.review || rev.comment}</p>
             </div>
           ))
         )}
