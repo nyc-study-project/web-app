@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { SPOTS_BASE } from "../api/config";
+import { COMPOSITE_BASE } from "../api/config";
 import { Link } from "react-router-dom";
 
 export default function Spots() {
@@ -9,14 +9,17 @@ export default function Spots() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`${SPOTS_BASE}/studyspots`);
+        const res = await fetch(`${COMPOSITE_BASE}/api/spots`);
         const json = await res.json();
-        setSpots(json);
+
+        // Composite returns { data: [...] }
+        setSpots(json.data || []);
       } catch (err) {
         console.error("Failed to load spots:", err);
       }
       setLoading(false);
     }
+
     load();
   }, []);
 
@@ -27,7 +30,7 @@ export default function Spots() {
       <h1 className="text-2xl font-semibold mb-4">Study Spots</h1>
 
       {spots.map((spot, index) => {
-        const s = spot.data;  // Correct spot object
+        const s = spot.data || spot; // safety
 
         return (
           <div
