@@ -9,7 +9,7 @@ export async function addReview(data) {
   const res = await fetch(`${COMPOSITE_BASE}/api/reviews`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
 
   return res;
