@@ -1,5 +1,6 @@
 // src/api/composite.js
 import { COMPOSITE_BASE } from "./config";
+import { authFetch } from "../lib/utils"; // ✅ Import authFetch
 
 export async function getSpotFull(id) {
   const url = `${COMPOSITE_BASE}/composite/spots/${id}/full`;
@@ -10,28 +11,18 @@ export async function getSpotFull(id) {
     res = await fetch(url);
   } catch (err) {
     console.error("[getSpotFull] Network error:", err);
-    const e = new Error("Network error");
-    e.kind = "network";
-    throw e;
+    throw new Error("Network error");
   }
 
-  let data = null;
-  try {
-    data = await res.json();
-  } catch {
-    // ignore JSON error; we'll still throw with status
-  }
+  const data = await res.json();
 
   if (!res.ok) {
     console.error("[getSpotFull] HTTP error:", res.status, data);
     const e = new Error(`Composite error ${res.status}`);
-    e.kind = "http";
     e.status = res.status;
-    e.body = data;
     throw e;
   }
 
-  console.log("[getSpotFull] Success:", data);
   return data;
 }
 
@@ -39,20 +30,26 @@ export async function addReview(payload) {
   const url = `${COMPOSITE_BASE}/api/reviews`;
   console.log("[addReview] POST", url, payload);
 
-  let res;
-  try {
-    res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-  } catch (err) {
-    console.error("[addReview] Network error:", err);
-    const e = new Error("Network error");
-    e.kind = "network";
-    throw e;
-  }
+  // ✅ Use authFetch to pass session headers (good practice)
+  const res = await authFetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
 
   console.log("[addReview] Response status:", res.status);
+  return res;
+}
+
+// ✅ NEW: Add Delete Function
+export async function deleteReview(reviewId) {
+  const url = `${COMPOSITE_BASE}/api/reviews/${reviewId}`;
+  console.log("[deleteReview] DELETE", url);
+
+  const res = await authFetch(url, {
+    method: "DELETE",
+  });
+
+  console.log("[deleteReview] Response status:", res.status);
   return res;
 }

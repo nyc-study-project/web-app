@@ -11,6 +11,7 @@ export default function AuthCallback() {
     let sessionId = null;
 
     // Method A: Check standard query string (e.g. ?session_id=123)
+    // Good for normal redirects
     const url = new URL(window.location.href);
     sessionId = url.searchParams.get("session_id");
 
@@ -28,14 +29,19 @@ export default function AuthCallback() {
     // 2. SAVE & REDIRECT
     // ---------------------------------------------------------
     if (sessionId) {
+      console.log("Session ID found:", sessionId);
       localStorage.setItem("session_id", sessionId);
 
-      // Force a hard reload so TopNav and the rest of the app 
-      // re-initialize with the new user state.
-      window.location.href = "/#/spots";
+      // ✅ CRITICAL FIX: Instantly swap the URL hash before reloading.
+      // This changes the browser URL from ".../callback" to ".../spots" immediately.
+      // If we don't do this, window.location.reload() reloads the callback page, causing a loop.
+      window.history.replaceState(null, "", "#/spots");
+
+      // Force a hard reload so the main app (App.jsx) re-initializes 
+      // and picks up the new 'session_id' from localStorage.
       window.location.reload();
     } else {
-      // If validation fails, send them back to the start
+      console.warn("No session ID found, redirecting to home.");
       navigate("/spots");
     }
   }, [navigate]);

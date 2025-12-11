@@ -223,7 +223,9 @@ function TopNav({ projectName }) {
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1 text-slate-700">
                   <UserIcon className="h-4 w-4" />
-                  <span className="text-xs">{user.name || "Logged in"}</span>
+                  <span className="text-xs">
+                  {user.name || user.username || user.email || "Logged in"}
+                </span>
                 </div>
 
                 <button
