@@ -71,7 +71,7 @@ const defaultConfig = {
     },
     {
       name: "Composite Gateway (Cloud Run)",
-      baseUrl: "https://composite-gateway-642518168067.us-central1.run.app",
+      baseUrl: "https://composite-gateway-642518168067.us-east1.run.app",
       notes: "Aggregates data across microservices",
       endpoints: [
         { label: "/health", path: "/health" },
@@ -161,11 +161,11 @@ async function pingHealth(baseUrl) {
  ✅ Layout — Navigation
 ----------------------------------------------------------- */
 
-function TopNav({ projectName }) {
+function TopNav({ projectName, user }) {
   const linkBase =
     "text-sm px-2 py-1 rounded-full transition-colors hover:bg-slate-100";
 
-  const user = useUser();
+  // const user = useUser();
 
 
   return (
@@ -643,10 +643,11 @@ function Footer() {
 
 function AppShell() {
   const [config, setConfig] = useConfig();
+  const user = useUser();
 
   return (
     <HashRouter>
-      <TopNav projectName={config.projectName} />
+      <TopNav projectName={config.projectName} user={user} />
 
       <Routes>
         <Route path="/" element={<Home config={config} />} />
@@ -657,7 +658,7 @@ function AppShell() {
           element={<ConfigurePage config={config} setConfig={setConfig} />}
         />
         <Route path="/spots" element={<Spots />} />
-        <Route path="/spots/:id" element={<SpotDetail />} />
+        <Route path="/spots/:id" element={<SpotDetail user={user} />} />
         <Route path="/callback" element={<AuthCallback />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="*" element={<NotFoundPage />} />

@@ -9,9 +9,9 @@ import { Button } from "../components/ui/button";
 import { Textarea } from "../components/ui/textarea";
 import { Trash2 } from "lucide-react"; // ✅ Icon for delete
 
-export default function SpotDetail() {
+export default function SpotDetail({ user }) {
   const { id } = useParams();
-  const user = useUser();
+  // const user = useUser();
 
   const [spot, setSpot] = useState(null);
   const [reviews, setReviews] = useState([]);
