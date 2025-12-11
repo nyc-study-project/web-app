@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import {
-  BrowserRouter,
+  HashRouter,
   Routes,
   Route,
   Link,
+  NavLink,
   useNavigate,
 } from "react-router-dom";
 
@@ -17,6 +18,9 @@ import {
   Globe,
   Link2,
   ShieldAlert,
+  Server,
+  Database as DbIcon,
+  Sparkles,
 } from "lucide-react";
 
 import Spots from "./pages/Spots";
@@ -44,7 +48,7 @@ const defaultConfig = {
     {
       name: "User Management (FastAPI, VM)",
       baseUrl: "http://34.139.134.144:8002",
-      notes: "FastAPI running on GCE VM + Cloud SQL MySQL",
+      notes: "FastAPI on GCE VM + Cloud SQL MySQL",
       endpoints: [
         { label: "/health", path: "/health" },
         { label: "/docs", path: "/docs" },
@@ -61,7 +65,7 @@ const defaultConfig = {
     },
     {
       name: "Composite Gateway (Cloud Run)",
-      baseUrl: "https://composite-gateway-642518168067.us-east1.run.app",
+      baseUrl: "https://composite-gateway-642518168067.us-central1.run.app",
       notes: "Aggregates data across microservices",
       endpoints: [
         { label: "/health", path: "/health" },
@@ -96,21 +100,39 @@ function useConfig() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
   }, [config]);
 
+  // ✅ Plain JS
   return [config, setConfig];
 }
+
 
 /* ----------------------------------------------------------
  ✅ Health Check Helpers
 ----------------------------------------------------------- */
 
+
+
 function StatusPill({ status }) {
+
   if (status === "ok")
     return (
-      <Badge className="bg-green-600 hover:bg-green-600">Healthy</Badge>
+      <Badge className="inline-flex items-center gap-1.5 border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-50">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+        Healthy
+      </Badge>
     );
   if (status === "fail")
-    return <Badge variant="destructive">Unreachable</Badge>;
-  return <Badge variant="secondary">Unknown</Badge>;
+    return (
+      <Badge className="inline-flex items-center gap-1.5 border border-red-200 bg-red-50 text-red-700 hover:bg-red-50">
+        <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+        Unreachable
+      </Badge>
+    );
+  return (
+    <Badge variant="secondary" className="inline-flex items-center gap-1.5">
+      <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+      Unknown
+    </Badge>
+  );
 }
 
 function joinUrl(base, path = "") {
@@ -128,39 +150,175 @@ async function pingHealth(baseUrl) {
   }
 }
 
+
 /* ----------------------------------------------------------
  ✅ Layout — Navigation
 ----------------------------------------------------------- */
 
 function TopNav({ projectName }) {
+  const linkBase =
+    "text-sm px-2 py-1 rounded-full transition-colors hover:bg-slate-100";
+
   return (
-    <div className="sticky top-0 bg-white/80 backdrop-blur border-b z-50">
-      <div className="max-w-screen-2xl mx-auto px-4 py-3 flex justify-between">
-        <Link to="/" className="flex gap-2 font-semibold items-center">
-          <Globe className="w-5 h-5" />
-          {projectName}
+    <div className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur">
+      <div className="mx-auto flex max-w-screen-2xl items-center justify-between px-4 py-3">
+        <Link to="/" className="flex items-center gap-2 font-semibold">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-500 text-white shadow-sm">
+            <Globe className="h-4 w-4" />
+          </span>
+          <span className="hidden text-sm text-slate-700 sm:inline">
+            {projectName}
+          </span>
         </Link>
 
-        <div className="flex items-center gap-4 text-sm">
-          <Link to="/services" className="hover:underline">
+        <div className="flex items-center gap-3 text-xs sm:text-sm">
+          <NavLink
+            to="/services"
+            className={({ isActive }) =>
+              `${linkBase} ${isActive ? "bg-slate-900 text-white" : ""}`
+            }
+          >
             Services
-          </Link>
-          <Link to="/spots" className="hover:underline">
+          </NavLink>
+          <NavLink
+            to="/spots"
+            className={({ isActive }) =>
+              `${linkBase} ${isActive ? "bg-slate-900 text-white" : ""}`
+            }
+          >
             Study Spots
-          </Link>
-          <Link to="/database" className="hover:underline">
+          </NavLink>
+          <NavLink
+            to="/database"
+            className={({ isActive }) =>
+              `${linkBase} ${isActive ? "bg-slate-900 text-white" : ""}`
+            }
+          >
             Database
-          </Link>
-          <Link to="/about" className="hover:underline">
+          </NavLink>
+          <NavLink
+            to="/about"
+            className={({ isActive }) =>
+              `${linkBase} ${isActive ? "bg-slate-900 text-white" : ""}`
+            }
+          >
             About
-          </Link>
+          </NavLink>
 
-          <Link to="/configure">
-            <Button size="sm" variant="outline">
+          <NavLink to="/configure">
+            <Button size="sm" variant="outline" className="hidden sm:inline-flex">
               Configure
             </Button>
-          </Link>
+          </NavLink>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ----------------------------------------------------------
+ ✅ Home / Dashboard
+----------------------------------------------------------- */
+
+function Home({ config }) {
+  const microserviceCount = config.microservices.length;
+
+  return (
+    <div className="mx-auto max-w-screen-2xl px-4 py-12">
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.3fr)] items-start">
+        {/* Hero */}
+        <div>
+          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-xs text-slate-600 shadow-sm">
+            <Sparkles className="h-3 w-3 text-sky-500" />
+            Sprint 2 · Distributed Microservices Demo
+          </div>
+
+          <h1 className="mt-5 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+            Discover NYC study spots,
+            <span className="block bg-gradient-to-r from-sky-500 to-indigo-500 bg-clip-text text-transparent">
+              powered by your cloud architecture.
+            </span>
+          </h1>
+
+          <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">
+            This web application is the front door to our microservice ecosystem.
+            Every interaction in the UI triggers live calls to our Cloud Run study-spots service, our GCE-hosted user
+            service, the reviews microservice, and the composite gateway.
+            Lets see the full flow from browser → composite gateway → atomic microservices → Cloud
+            SQL / MySQL → back to UI in real time.
+
+          </p>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link to="/spots">
+              <Button className="shadow-sm">Browse study spots</Button>
+            </Link>
+            <Link to="/services">
+              <Button variant="outline">View service health</Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Architecture summary card */}
+        <Card className="border-none bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 text-slate-50 shadow-xl">
+          <CardContent className="p-6 space-y-6">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                  Architecture snapshot
+                </p>
+                <p className="mt-2 text-lg font-semibold">
+                  NYC Study Spots — Cloud View
+                </p>
+              </div>
+              <div className="rounded-2xl bg-slate-800 px-3 py-1 text-[11px] font-medium text-slate-200">
+                COMS W4153 001 · Final Project
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl bg-slate-800/80 p-3">
+                <div className="flex items-center gap-2 text-xs text-slate-400">
+                  <Server className="h-3.5 w-3.5" />
+                  Microservices
+                </div>
+                <p className="mt-2 text-2xl font-semibold">{microserviceCount}</p>
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Cloud Run + GCE VM + Composite gateway
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-slate-800/80 p-3">
+                <div className="flex items-center gap-2 text-xs text-slate-400">
+                  <DbIcon className="h-3.5 w-3.5" />
+                  Databases
+                </div>
+                <p className="mt-2 text-2xl font-semibold">2</p>
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Cloud SQL Postgres &amp; MySQL backing services
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-slate-800/80 p-3">
+                <div className="flex items-center gap-2 text-xs text-slate-400">
+                  <Globe className="h-3.5 w-3.5" />
+                  Frontend
+                </div>
+                <p className="mt-2 text-2xl font-semibold">1</p>
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Static SPA on Cloud Storage with OAuth2
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-2xl bg-slate-800/70 p-3 text-[11px] leading-relaxed text-slate-300">
+              User actions in the browser propagate through the Composite Gateway, which performs parallel fan-out
+              to the spot, user, and reviews microservices.
+              Each microservice reads/writes data in Cloud SQL (Postgres/MySQL) or the MySQL VM, and the
+              aggregated result is returned to the UI.
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
@@ -170,10 +328,11 @@ function TopNav({ projectName }) {
  ✅ Services Dashboard Page UI
 ----------------------------------------------------------- */
 
+
 function Services({ config }) {
   const [statuses, setStatuses] = useState(
     config.microservices.map(() => ({ status: "unknown", code: "" }))
-  );
+   );
   const [loadingIndex, setLoadingIndex] = useState(-1);
 
   const doPing = async (idx) => {
@@ -186,53 +345,87 @@ function Services({ config }) {
   };
 
   return (
-    <div className="max-w-screen-2xl mx-auto px-4 py-8 space-y-6">
-      <h2 className="text-2xl font-semibold">Services</h2>
+    <div className="mx-auto max-w-screen-2xl px-4 py-10 space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight">Services</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            A live view of the microservices backing NYC Study Spots.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 text-[11px] text-slate-500">
+          <StatusPill status="ok" />
+          <span>·</span>
+          <StatusPill status="fail" />
+          <span>·</span>
+          <StatusPill status="unknown" />
+        </div>
+      </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid gap-6 md:grid-cols-2">
         {config.microservices.map((svc, idx) => (
-          <Card key={idx} className="rounded-2xl">
-            <CardContent className="p-4 space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="font-medium">{svc.name}</span>
+          <Card
+            key={idx}
+            className="group h-full rounded-2xl border-slate-200 bg-white/80 shadow-sm transition hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-md"
+          >
+            <CardContent className="flex h-full flex-col gap-3 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-700">
+                    <Server className="h-3 w-3" />
+                    Microservice
+                  </div>
+                  <h3 className="mt-2 text-sm font-semibold text-slate-900">
+                    {svc.name}
+                  </h3>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {svc.notes}
+                  </p>
+                </div>
                 <StatusPill status={statuses[idx].status} />
               </div>
 
-              <p className="text-sm text-muted-foreground">{svc.notes}</p>
-
               {/* Endpoint links */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="mt-1 grid grid-cols-2 gap-2 text-xs">
                 {svc.endpoints.map((e, i) => (
                   <a
                     key={i}
                     href={joinUrl(svc.baseUrl, e.path)}
                     target="_blank"
                     rel="noreferrer"
-                    className="border rounded-lg py-2 text-center text-sm hover:bg-gray-50"
+                    className="flex items-center justify-center rounded-xl border bg-white px-2 py-2 text-center font-medium text-slate-700 transition group-hover:border-sky-200 hover:bg-sky-50"
                   >
                     {e.label}
                   </a>
                 ))}
               </div>
 
-              <Button
-                size="sm"
-                onClick={() => doPing(idx)}
-                disabled={loadingIndex === idx}
-              >
-                {loadingIndex === idx ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Checking...
-                  </>
-                ) : (
-                  "Check Health"
-                )}
-              </Button>
+              <div className="mt-2 flex items-center justify-between gap-3">
+                <Button
+                  size="sm"
+                  onClick={() => doPing(idx)}
+                  disabled={loadingIndex === idx}
+                  className="text-xs"
+                >
+                  {loadingIndex === idx ? (
+                    <>
+                      <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                      Checking...
+                    </>
+                  ) : (
+                    "Check health"
+                  )}
+                </Button>
 
-              <div className="flex gap-2 text-xs text-muted-foreground items-center truncate">
-                <Link2 className="w-4 h-4" />
-                {svc.baseUrl}
+                <div className="flex flex-1 items-center gap-2 truncate text-[11px] text-muted-foreground">
+                  <Link2 className="h-3 w-3 flex-shrink-0" />
+                  <span className="truncate">{svc.baseUrl}</span>
+                  {statuses[idx].code && (
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px]">
+                      {statuses[idx].code}
+                    </span>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -243,18 +436,56 @@ function Services({ config }) {
 }
 
 /* ----------------------------------------------------------
- ✅ Database placeholder page
+ ✅ Database page
 ----------------------------------------------------------- */
 
 function DatabasePage({ config }) {
   const db = config.database;
 
   return (
-    <div className="max-w-screen-2xl mx-auto px-4 py-6">
-      <h2 className="text-xl font-semibold">Database</h2>
-      <p className="text-sm text-muted-foreground mt-2">
-        {db.vendor} — {db.notes}
-      </p>
+    <div className="mx-auto max-w-screen-2xl px-4 py-10 space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold tracking-tight">Database layer</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          How data flows between Cloud SQL, VM, and your microservices.
+        </p>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="rounded-2xl">
+          <CardContent className="space-y-3 p-5">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-slate-500">
+              <DbIcon className="h-4 w-4" />
+              Cloud SQL
+            </div>
+            <p className="text-sm font-semibold">
+              {db.vendor}
+            </p>
+            <p className="text-sm text-muted-foreground">{db.notes}</p>
+            <div className="rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
+              Use this card to describe how Spot Management and User Management
+              talk to different Cloud SQL instances during our demo.
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl">
+          <CardContent className="space-y-3 p-5">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-slate-500">
+              <Server className="h-4 w-4" />
+              VM & networking
+            </div>
+            <p className="text-sm font-semibold">GCE VM + private services</p>
+            <p className="text-sm text-muted-foreground">
+              {db.host}
+            </p>
+            <div className="rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
+              Call out service accounts, VPC connectors, and how your VM and
+              Cloud Run services reach Cloud SQL securely.
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
@@ -263,7 +494,7 @@ function DatabasePage({ config }) {
  ✅ Configure page
 ----------------------------------------------------------- */
 
-function ConfigurePage({ config, setConfig }) {
+function ConfigurePage({ config, setConfig }){
   const [draft, setDraft] = useState(JSON.stringify(config, null, 2));
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -273,6 +504,7 @@ function ConfigurePage({ config, setConfig }) {
       const next = JSON.parse(draft);
       setConfig(next);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      setError("");
       navigate("/services");
     } catch {
       setError("Invalid JSON — fix formatting first.");
@@ -280,34 +512,80 @@ function ConfigurePage({ config, setConfig }) {
   };
 
   return (
-    <div className="max-w-screen-2xl mx-auto px-4 py-6 space-y-4">
-      <h2 className="text-xl font-semibold">Configure</h2>
-
-      <Textarea
-        rows={22}
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-        className="font-mono text-sm"
-      />
-
-      {error && (
-        <div className="text-sm text-red-600 flex gap-2 items-center">
-          <ShieldAlert className="w-4 h-4" />
-          {error}
+    <div className="mx-auto max-w-screen-2xl px-4 py-10 space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold tracking-tight">Configure</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Edit the microservice base URLs and metadata used across the UI.
+          </p>
         </div>
-      )}
-
-      <div className="flex gap-2">
-        <Button onClick={save}>Save</Button>
-        <Button
-          variant="outline"
-          onClick={() =>
-            setDraft(JSON.stringify(defaultConfig, null, 2))
-          }
-        >
-          Reset
-        </Button>
       </div>
+
+      <Card className="rounded-2xl">
+        <CardContent className="space-y-4 p-4 sm:p-5">
+          <Textarea
+            rows={22}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            className="font-mono text-xs sm:text-sm bg-slate-950 text-slate-50 border-slate-800 rounded-xl"
+          />
+
+          {error && (
+            <div className="flex items-center gap-2 text-sm text-red-600">
+              <ShieldAlert className="h-4 w-4" />
+              {error}
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={save}>Save</Button>
+            <Button
+              variant="outline"
+              onClick={() =>
+                setDraft(JSON.stringify(defaultConfig, null, 2))
+              }
+            >
+              Reset to default
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+/* ----------------------------------------------------------
+ ✅ Simple About / Not Found
+----------------------------------------------------------- */
+
+function AboutPage() {
+  return (
+    <div className="mx-auto max-w-screen-2xl px-4 py-10">
+      <Card className="rounded-2xl">
+        <CardContent className="space-y-3 p-6">
+          <h2 className="text-xl font-semibold mb-1">About</h2>
+          <p className="text-sm text-muted-foreground">
+            This app was built for COMS W4153 001 to demonstrate a
+            microservice-based architecture on Google Cloud: Cloud Run, GCE VM,
+            Cloud SQL, and a composite gateway, all surfaced through a single
+            browser UI.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Use it as a live storyboard in your final presentation: click
+            through routes while explaining how requests move through your
+            system.
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function NotFoundPage() {
+  return (
+    <div className="mx-auto max-w-screen-2xl px-4 py-10 text-sm text-muted-foreground">
+      Page not found.
     </div>
   );
 }
@@ -318,8 +596,8 @@ function ConfigurePage({ config, setConfig }) {
 
 function Footer() {
   return (
-    <footer className="border-t mt-10 py-6 text-center text-xs text-muted-foreground">
-      © {new Date().getFullYear()} Study Spots · Sprint 2
+    <footer className="mt-10 border-t bg-white/60 py-6 text-center text-[11px] text-muted-foreground">
+      © {new Date().getFullYear()} Study Spots · Final Project · Built on Google Cloud
     </footer>
   );
 }
@@ -332,23 +610,11 @@ function AppShell() {
   const [config, setConfig] = useConfig();
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <TopNav projectName={config.projectName} />
 
       <Routes>
-        <Route
-          path="/"
-          element={
-            <div className="max-w-screen-2xl mx-auto px-4 py-10">
-              <h1 className="text-3xl font-bold">Welcome to Study Spots</h1>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Explore NYC campus study spaces — powered by distributed
-                microservices.
-              </p>
-            </div>
-          }
-        />
-
+        <Route path="/" element={<Home config={config} />} />
         <Route path="/services" element={<Services config={config} />} />
         <Route path="/database" element={<DatabasePage config={config} />} />
         <Route
@@ -357,34 +623,15 @@ function AppShell() {
         />
         <Route path="/spots" element={<Spots />} />
         <Route path="/spots/:id" element={<SpotDetail />} />
-
-        <Route
-          path="/about"
-          element={
-            <div className="max-w-screen-2xl mx-auto px-4 py-10">
-              <h2 className="text-xl font-semibold mb-2">About</h2>
-              <p className="text-sm text-muted-foreground">
-                Built in Sprint 2 of COMS 6998 — demonstrating Cloud Run,
-                GCE VM, API integration, and a composite gateway.
-              </p>
-            </div>
-          }
-        />
-
-        <Route
-          path="*"
-          element={
-            <div className="max-w-screen-2xl mx-auto px-4 py-10 text-sm text-muted-foreground">
-              Page not found.
-            </div>
-          }
-        />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
 
       <Footer />
-    </BrowserRouter>
+    </HashRouter>
   );
 }
+
 
 /* ----------------------------------------------------------
  ✅ Export Root Component
@@ -392,7 +639,7 @@ function AppShell() {
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-slate-50 to-slate-100">
       <AppShell />
     </div>
   );
