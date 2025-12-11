@@ -1,19 +1,41 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { addReview } from "../api/composite";
+import { authFetch } from "../lib/utils";
 
 export default function AddReviewForm({ spotId }) {
   const [rating, setRating] = useState("");
   const [comment, setComment] = useState("");
 
+  // Logged-in user
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    authFetch(`${import.meta.env.VITE_USER_MANAGEMENT_BASE}/auth/me`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then(setUser);
+  }, []);
+
+  // Block form if not logged in
+  if (!user) {
+    return <div className="mt-4">Please login to submit a review.</div>;
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
 
-    const response = await addReview({
-      spot_id: spotId,
-      user_id: "65f38323-11b6-4207-ad2e-8f0ebcf02381", // hardcode a real UUID
-      review: comment,
-      rating: Number(rating),
-    });
+    const response = await authFetch(
+      `${import.meta.env.VITE_COMPOSITE_BASE}/reviews`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          spot_id: spotId,
+          user_id: user.id, // real logged-in user
+          review: comment,
+          rating: Number(rating),
+        }),
+      }
+    );
 
     if (response.status === 201) alert("Review added!");
     else alert("Review failed");

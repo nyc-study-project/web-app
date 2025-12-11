@@ -7,6 +7,9 @@ import {
   NavLink,
   useNavigate,
 } from "react-router-dom";
+// Add to your imports at the top
+import AuthCallback from "./pages/AuthCallback"; // Update path if you saved it elsewhere
+import { COMPOSITE_BASE } from "./api/config";
 
 import { Card, CardContent } from "./components/ui/card";
 import { Button } from "./components/ui/button";
@@ -210,6 +213,12 @@ function TopNav({ projectName }) {
               Configure
             </Button>
           </NavLink>
+          <a
+  href={`${COMPOSITE_BASE}/auth/login/google`}
+  className={linkBase}
+>
+  Login with Google
+</a>
         </div>
       </div>
     </div>
@@ -623,6 +632,7 @@ function AppShell() {
         />
         <Route path="/spots" element={<Spots />} />
         <Route path="/spots/:id" element={<SpotDetail />} />
+        <Route path="/callback" element={<AuthCallback />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
