@@ -70,13 +70,15 @@ export default function SpotDetail({ user }) {
         rating: Number(form.rating),
         review: form.review,
       };
-      
-      const res = await addReview(payload);
-      if (!res.ok) throw new Error("Failed");
 
-      await loadData(); // Refresh list
+      const res = await addReview(payload);
+      
+      if (res.detail) throw new Error(res.detail);
+
+      await loadData(); // Refresh list to show the new review
       setForm((prev) => ({ ...prev, review: "" }));
     } catch (err) {
+      console.error(err);
       alert("Could not submit review.");
     } finally {
       setSubmitting(false);
