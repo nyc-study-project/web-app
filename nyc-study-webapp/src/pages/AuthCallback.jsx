@@ -6,17 +6,13 @@ export default function AuthCallback() {
 
   useEffect(() => {
     // ---------------------------------------------------------
-    // 1. ROBUST TOKEN EXTRACTION
+    // TOKEN EXTRACTION
     // ---------------------------------------------------------
     let sessionId = null;
 
-    // Method A: Check standard query string (e.g. ?session_id=123)
-    // Good for normal redirects
     const url = new URL(window.location.href);
     sessionId = url.searchParams.get("session_id");
 
-    // Method B: Check INSIDE the hash (e.g. /#/callback?session_id=123)
-    // This is common with HashRouter if the provider appends params at the end
     if (!sessionId && window.location.hash.includes("?")) {
       const hashParts = window.location.hash.split("?"); 
       if (hashParts.length > 1) {
@@ -26,19 +22,14 @@ export default function AuthCallback() {
     }
 
     // ---------------------------------------------------------
-    // 2. SAVE & REDIRECT
+    // SAVE & REDIRECT
     // ---------------------------------------------------------
     if (sessionId) {
       console.log("Session ID found:", sessionId);
       localStorage.setItem("session_id", sessionId);
 
-      // ✅ CRITICAL FIX: Instantly swap the URL hash before reloading.
-      // This changes the browser URL from ".../callback" to ".../spots" immediately.
-      // If we don't do this, window.location.reload() reloads the callback page, causing a loop.
       window.history.replaceState(null, "", "#/spots");
 
-      // Force a hard reload so the main app (App.jsx) re-initializes 
-      // and picks up the new 'session_id' from localStorage.
       window.location.reload();
     } else {
       console.warn("No session ID found, redirecting to home.");

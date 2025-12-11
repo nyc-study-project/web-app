@@ -10,8 +10,7 @@ import {
 import { useUser } from "./lib/useUser";
 import { LogOut, User as UserIcon } from "lucide-react";
 
-// Add to your imports at the top
-import AuthCallback from "./pages/AuthCallback"; // Update path if you saved it elsewhere
+import AuthCallback from "./pages/AuthCallback"; 
 import { COMPOSITE_BASE } from "./api/config";
 
 import { Card, CardContent } from "./components/ui/card";
@@ -35,7 +34,7 @@ import SpotDetail from "./pages/SpotDetail";
 const STORAGE_KEY = "sprint1_webapp_config_v1";
 
 /* ----------------------------------------------------------
- ✅ PUBLIC CLOUD SERVICE CONFIG — SPRINT 2
+ PUBLIC CLOUD SERVICE CONFIG — SPRINT 2
 ----------------------------------------------------------- */
 
 const defaultConfig = {
@@ -89,7 +88,7 @@ const defaultConfig = {
 };
 
 /* ----------------------------------------------------------
- ✅ Persist config in browser
+ Persist config in browser
 ----------------------------------------------------------- */
 
 function useConfig() {
@@ -106,13 +105,13 @@ function useConfig() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
   }, [config]);
 
-  // ✅ Plain JS
+  // Plain JS
   return [config, setConfig];
 }
 
 
 /* ----------------------------------------------------------
- ✅ Health Check Helpers
+ Health Check Helpers
 ----------------------------------------------------------- */
 
 
@@ -158,14 +157,13 @@ async function pingHealth(baseUrl) {
 
 
 /* ----------------------------------------------------------
- ✅ Layout — Navigation
+ Layout — Navigation
 ----------------------------------------------------------- */
 
 function TopNav({ projectName, user }) {
   const linkBase =
     "text-sm px-2 py-1 rounded-full transition-colors hover:bg-slate-100";
 
-  // const user = useUser();
 
 
   return (
@@ -252,7 +250,7 @@ function TopNav({ projectName, user }) {
 }
 
 /* ----------------------------------------------------------
- ✅ Home / Dashboard
+ Home / Dashboard
 ----------------------------------------------------------- */
 
 function Home({ config }) {
@@ -360,7 +358,7 @@ function Home({ config }) {
 }
 
 /* ----------------------------------------------------------
- ✅ Services Dashboard Page UI
+ Services Dashboard Page UI
 ----------------------------------------------------------- */
 
 
@@ -471,7 +469,7 @@ function Services({ config }) {
 }
 
 /* ----------------------------------------------------------
- ✅ Database page
+ Database page
 ----------------------------------------------------------- */
 
 function DatabasePage({ config }) {
@@ -526,7 +524,7 @@ function DatabasePage({ config }) {
 }
 
 /* ----------------------------------------------------------
- ✅ Configure page
+ Configure page
 ----------------------------------------------------------- */
 
 function ConfigurePage({ config, setConfig }){
@@ -591,7 +589,7 @@ function ConfigurePage({ config, setConfig }){
 }
 
 /* ----------------------------------------------------------
- ✅ Simple About / Not Found
+ Simple About / Not Found
 ----------------------------------------------------------- */
 
 function AboutPage() {
@@ -626,7 +624,7 @@ function NotFoundPage() {
 }
 
 /* ----------------------------------------------------------
- ✅ Footer
+ Footer
 ----------------------------------------------------------- */
 
 function Footer() {
@@ -638,7 +636,7 @@ function Footer() {
 }
 
 /* ----------------------------------------------------------
- ✅ Main Routing Shell
+ Main Routing Shell
 ----------------------------------------------------------- */
 
 function AppShell() {
@@ -671,7 +669,7 @@ function AppShell() {
 
 
 /* ----------------------------------------------------------
- ✅ Export Root Component
+ Export Root Component
 ----------------------------------------------------------- */
 
 export default function App() {

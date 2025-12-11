@@ -160,7 +160,7 @@ export default function Spots() {
           <div>
             <h1 className="text-4xl font-semibold tracking-tight">
               <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                Study Spots in New York City (let me add reviews)
+                Study Spots in New York City
               </span>
             </h1>
             <p className="mt-1 text-sm text-muted-foreground max-w-xl">

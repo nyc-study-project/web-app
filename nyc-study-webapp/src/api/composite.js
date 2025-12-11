@@ -1,6 +1,6 @@
 // src/api/composite.js
 import { COMPOSITE_BASE } from "./config";
-import { authFetch } from "../lib/utils"; // ✅ Import authFetch
+import { authFetch } from "../lib/utils";
 
 export async function getSpotFull(id) {
   const url = `${COMPOSITE_BASE}/composite/spots/${id}/full`;
@@ -30,7 +30,6 @@ export async function addReview(payload) {
   const url = `${COMPOSITE_BASE}/api/reviews`;
   console.log("[addReview] POST", url, payload);
 
-  // ✅ Use authFetch to pass session headers (good practice)
   const res = await authFetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -41,7 +40,6 @@ export async function addReview(payload) {
   return res;
 }
 
-// ✅ NEW: Add Delete Function
 export async function deleteReview(reviewId) {
   const url = `${COMPOSITE_BASE}/api/reviews/${reviewId}`;
   console.log("[deleteReview] DELETE", url);

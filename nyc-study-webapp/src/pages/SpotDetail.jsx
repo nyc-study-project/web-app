@@ -1,17 +1,16 @@
 // src/pages/SpotDetail.jsx
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { getSpotFull, addReview, deleteReview } from "../api/composite"; // ✅ Import deleteReview
+import { getSpotFull, addReview, deleteReview } from "../api/composite";
 import { useUser } from "../lib/useUser";
 import { Card, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Textarea } from "../components/ui/textarea";
-import { Trash2 } from "lucide-react"; // ✅ Icon for delete
+import { Trash2 } from "lucide-react";
 
 export default function SpotDetail({ user }) {
   const { id } = useParams();
-  // const user = useUser();
 
   const [spot, setSpot] = useState(null);
   const [reviews, setReviews] = useState([]);
@@ -85,7 +84,6 @@ export default function SpotDetail({ user }) {
     }
   }
 
-  // ✅ NEW: Handle Delete
   async function handleDelete(reviewId) {
     if (!confirm("Are you sure you want to delete this review?")) return;
     try {
