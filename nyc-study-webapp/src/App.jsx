@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-  BrowserRouter,
+  HashRouter,
   Routes,
   Route,
   Link,
@@ -21,6 +21,9 @@ import {
 
 import Spots from "./pages/Spots";
 import SpotDetail from "./pages/SpotDetail";
+
+import AuthCallback from "./pages/AuthCallback";
+
 
 const STORAGE_KEY = "sprint1_webapp_config_v1";
 
@@ -133,6 +136,8 @@ async function pingHealth(baseUrl) {
 ----------------------------------------------------------- */
 
 function TopNav({ projectName }) {
+  const sessionId = localStorage.getItem("session_id");
+
   return (
     <div className="sticky top-0 bg-white/80 backdrop-blur border-b z-50">
       <div className="max-w-screen-2xl mx-auto px-4 py-3 flex justify-between">
@@ -160,11 +165,35 @@ function TopNav({ projectName }) {
               Configure
             </Button>
           </Link>
+
+          {!sessionId && (
+            <button
+              onClick={() =>
+                (window.location.href = `${import.meta.env.VITE_USER_MANAGEMENT_BASE}/auth/login/google`)
+              }
+              className="px-2 py-1 rounded bg-blue-500 text-white"
+            >
+              Login
+            </button>
+          )}
+
+          {sessionId && (
+            <button
+              onClick={() => {
+                localStorage.removeItem("session_id");
+                window.location.reload();
+              }}
+              className="px-2 py-1 rounded bg-gray-400 text-white"
+            >
+              Logout
+            </button>
+          )}
         </div>
       </div>
     </div>
   );
 }
+
 
 /* ----------------------------------------------------------
  ✅ Services Dashboard Page UI
@@ -332,7 +361,7 @@ function AppShell() {
   const [config, setConfig] = useConfig();
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <TopNav projectName={config.projectName} />
 
       <Routes>
@@ -357,7 +386,7 @@ function AppShell() {
         />
         <Route path="/spots" element={<Spots />} />
         <Route path="/spots/:id" element={<SpotDetail />} />
-
+        <Route path="/auth/callback" element={<AuthCallback />} />
         <Route
           path="/about"
           element={
@@ -382,7 +411,7 @@ function AppShell() {
       </Routes>
 
       <Footer />
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
