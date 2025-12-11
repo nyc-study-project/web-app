@@ -5,13 +5,13 @@ export function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
 
-
 export function authFetch(url, options = {}) {
   const sessionId = localStorage.getItem("session_id");
 
   const headers = {
     ...(options.headers || {}),
-    ...(sessionId ? { auth: `Bearer ${sessionId}` } : {})
+    // CHANGE: 'auth' -> 'Authorization' so the backend recognizes it
+    ...(sessionId ? { Authorization: `Bearer ${sessionId}` } : {})
   };
 
   return fetch(url, { ...options, headers });
