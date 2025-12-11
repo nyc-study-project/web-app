@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { addReview } from "../api/composite";
 import { authFetch } from "../lib/utils";
+import { COMPOSITE_BASE } from "../api/config";
 
 export default function AddReviewForm({ spotId }) {
   const [rating, setRating] = useState("");
@@ -9,8 +10,9 @@ export default function AddReviewForm({ spotId }) {
   // Logged-in user
   const [user, setUser] = useState(null);
 
+  // Fetch real user from Composite Gateway (correct!)
   useEffect(() => {
-    authFetch(`${import.meta.env.VITE_USER_MANAGEMENT_BASE}/auth/me`)
+    authFetch(`${COMPOSITE_BASE}/auth/me`)
       .then((r) => (r.ok ? r.json() : null))
       .then(setUser);
   }, []);
@@ -23,22 +25,22 @@ export default function AddReviewForm({ spotId }) {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    const response = await authFetch(
-      `${import.meta.env.VITE_COMPOSITE_BASE}/reviews`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          spot_id: spotId,
-          user_id: user.id, // real logged-in user
-          review: comment,
-          rating: Number(rating),
-        }),
-      }
-    );
+    const response = await authFetch(`${COMPOSITE_BASE}/reviews`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        spot_id: spotId,
+        user_id: user.id, // real authenticated user from Composite
+        review: comment,
+        rating: Number(rating),
+      }),
+    });
 
-    if (response.status === 201) alert("Review added!");
-    else alert("Review failed");
+    if (response.status === 201) {
+      alert("Review added!");
+    } else {
+      alert("Review failed");
+    }
   }
 
   return (

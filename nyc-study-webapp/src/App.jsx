@@ -7,6 +7,9 @@ import {
   NavLink,
   useNavigate,
 } from "react-router-dom";
+import { useUser } from "./lib/useUser";
+import { LogOut, User as UserIcon } from "lucide-react";
+
 // Add to your imports at the top
 import AuthCallback from "./pages/AuthCallback"; // Update path if you saved it elsewhere
 import { COMPOSITE_BASE } from "./api/config";
@@ -162,6 +165,9 @@ function TopNav({ projectName }) {
   const linkBase =
     "text-sm px-2 py-1 rounded-full transition-colors hover:bg-slate-100";
 
+  const user = useUser();
+
+
   return (
     <div className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur">
       <div className="mx-auto flex max-w-screen-2xl items-center justify-between px-4 py-3">
@@ -213,12 +219,30 @@ function TopNav({ projectName }) {
               Configure
             </Button>
           </NavLink>
-          <a
-  href={`${COMPOSITE_BASE}/auth/login/google`}
-  className={linkBase}
->
-  Login with Google
-</a>
+          {user ? (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1 text-slate-700">
+                  <UserIcon className="h-4 w-4" />
+                  <span className="text-xs">{user.name || "Logged in"}</span>
+                </div>
+
+                <button
+                  onClick={() => {
+                    localStorage.removeItem("session_id");
+                    window.location.reload();
+                  }}
+                  className={`${linkBase} flex items-center gap-1 text-red-600`}
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <a href={`${COMPOSITE_BASE}/auth/login/google`} className={linkBase}>
+                Login with Google
+              </a>
+            )}
+
         </div>
       </div>
     </div>
