@@ -8,6 +8,7 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Textarea } from "../components/ui/textarea";
 import { Trash2, Star } from "lucide-react";
+import { COMPOSITE_BASE } from "../api/config";
 
 export default function SpotDetail({ user }) {
   const { id } = useParams();
@@ -201,7 +202,12 @@ export default function SpotDetail({ user }) {
                 </>
               ) : (
                 <div className="text-xs text-center p-2 bg-slate-50 rounded border border-dashed">
-                    <Link to="/login" className="text-indigo-600 underline">Log in</Link> to rate.
+                    <a 
+                      href={`${COMPOSITE_BASE}/auth/login/google`} 
+                      className="text-indigo-600 underline"
+                    >
+                      Log in to rate.
+                    </a>
                 </div>
               )}
             </CardContent>
