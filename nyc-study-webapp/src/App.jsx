@@ -47,7 +47,7 @@ const defaultConfig = {
       notes: "Cloud Run + Cloud SQL Postgres",
       endpoints: [
         { label: "/health", path: "/health" },
-        { label: "/studyspots", path: "/studyspots" },
+        { label: "/docs", path: "/docs" },
       ],
     },
     {
@@ -65,7 +65,7 @@ const defaultConfig = {
       notes: "Swagger-first reviews service on Cloud Run",
       endpoints: [
         { label: "/health", path: "/health" },
-        { label: "/reviews/{id}", path: "/reviews" },
+        { label: "/docs", path: "/docs" },
       ],
     },
     {
@@ -74,7 +74,7 @@ const defaultConfig = {
       notes: "Aggregates data across microservices",
       endpoints: [
         { label: "/health", path: "/health" },
-        { label: "/spots/overview", path: "/spots/overview" },
+        { label: "/docs", path: "/docs" },
       ],
     },
   ],
@@ -439,6 +439,7 @@ function Services({ config }) {
                   onClick={() => doPing(idx)}
                   disabled={loadingIndex === idx}
                   className="text-xs"
+                  variant="outline"
                 >
                   {loadingIndex === idx ? (
                     <>
