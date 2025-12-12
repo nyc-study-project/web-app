@@ -7,7 +7,7 @@ import { Card, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Textarea } from "../components/ui/textarea";
-import { Trash2 } from "lucide-react";
+import { Trash2, Star } from "lucide-react";
 
 export default function SpotDetail({ user }) {
   const { id } = useParams();
@@ -100,12 +100,27 @@ export default function SpotDetail({ user }) {
   const address = spot.address || {};
   const amenity = spot.amenity || {};
 
+  const avgRating = ratingSummary?.average_rating || 0;
+  const ratingCount = ratingSummary?.rating_count || 0;
+
+  const myReviews = user ? reviews.filter(r => r.user_id === user.id) : [];
+  const otherReviews = user ? reviews.filter(r => r.user_id !== user.id) : reviews;
+
   return (
     <div className="max-w-screen-lg mx-auto px-4 py-6 space-y-6 min-h-[calc(100vh-80px)]">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-semibold">{spot.name}</h1>
+          {ratingCount > 0 && (
+              <div className="flex items-center bg-amber-50 text-amber-600 px-2.5 py-1 rounded-lg text-sm font-bold border border-amber-100">
+                <Star className="w-4 h-4 mr-1.5 fill-amber-500 text-amber-500" />
+                {Number(avgRating).toFixed(1)}
+                <span className="text-amber-600/60 font-medium ml-1 text-xs">
+                   ({ratingCount})
+                </span>
+              </div>
+            )}
           <p className="text-sm text-muted-foreground">{address.street}, {address.city}</p>
         </div>
         <div className="flex gap-2">
@@ -130,54 +145,41 @@ export default function SpotDetail({ user }) {
            </Card>
         </div>
 
-        {/* Right Column: Reviews */}
+        {/* Right Column: Split Reviews */}
         <div className="space-y-4">
-          <Card className="rounded-2xl">
-            <CardContent className="p-4 space-y-4">
-              <h2 className="text-sm font-semibold">Reviews ({reviews.length})</h2>
-              
-              <div className="space-y-3 max-h-60 overflow-y-auto">
-                {reviews.length === 0 && <p className="text-xs text-muted-foreground">No reviews yet.</p>}
-                
-                {reviews.map((r) => {
-                  const reviewUser = users.find((u) => u.id === r.user_id);
-                  const isMyReview = user && r.user_id === user.id;
-                  
-                  // NOTE: r.rating is usually undefined here because fetching reviews 
-                  // doesn't join the ratings table. We show a generic star if missing.
-                  const ratingVal = r.rating || r.data?.rating; 
-
-                  return (
-                    <div key={r.id || Math.random()} className="group border rounded-xl p-3 text-xs bg-slate-50/50">
-                      <div className="flex justify-between items-start">
-                        <div className="font-medium text-slate-800">
-                            {reviewUser?.username || "Anonymous"}
-                        </div>
-                        {isMyReview && (
-                            <button onClick={() => handleDelete(r.id)} className="text-slate-400 hover:text-red-500">
-                                <Trash2 className="h-3 w-3" />
-                            </button>
-                        )}
-                      </div>
-                      
-                      {/* Star Display */}
-                      <div className="text-amber-400 text-[10px] my-1">
-                         {ratingVal ? "★".repeat(ratingVal) : "★ (Rating hidden)"}
-                      </div>
-
-                      <p className="text-slate-600">{r.review || r.comment || ""}</p>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Add Review Form */}
+          
+          {/* 1. My Rating Card */}
+          <Card className="rounded-2xl bg-white border-indigo-100 shadow-sm">
+            <CardContent className="p-4">
+              <h2 className="text-sm font-semibold mb-3 text-indigo-900">Your Rating</h2>
               {user ? (
-                <form onSubmit={handleSubmit} className="border-t pt-3 mt-2 space-y-3">
-                    <div className="text-xs font-medium">Post a review</div>
-                    <div className="flex gap-2">
+                <>
+                 {/* Display My Reviews */}
+                 {myReviews.length > 0 && (
+                   <div className="space-y-3 mb-3">
+                     {myReviews.map((myReview) => (
+                       <div key={myReview.id} className="border border-indigo-100 rounded-xl p-3 bg-indigo-50">
+                          <div className="flex justify-between items-start mb-1">
+                            <div className="font-semibold text-slate-900 text-xs">You</div>
+                            <button onClick={() => handleDelete(myReview.id)} className="text-slate-400 hover:text-red-500">
+                               <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                          <div className="text-amber-400 text-[10px] mb-1">
+                             {"★".repeat(myReview.rating || 0)}<span className="text-slate-200">{"★".repeat(5-(myReview.rating||0))}</span>
+                          </div>
+                          <p className="text-slate-700 text-xs">{myReview.review || myReview.comment}</p>
+                       </div>
+                     ))}
+                   </div>
+                 )}
+
+                 {/* Add Review Form */}
+                 {myReviews.length === 0 && (
+                   <form onSubmit={handleSubmit} className="space-y-3">
+                      <div className="flex gap-2">
                         <select 
-                           className="text-xs border rounded px-2 bg-white"
+                           className="text-xs border rounded px-2 bg-slate-50"
                            value={form.rating}
                            onChange={e => setForm(f => ({...f, rating: e.target.value}))}
                         >
@@ -190,17 +192,53 @@ export default function SpotDetail({ user }) {
                            onChange={e => setForm(f => ({...f, review: e.target.value}))}
                            required
                         />
-                        <Button size="sm" type="submit" disabled={submitting} className="h-8">
+                        <Button size="sm" type="submit" disabled={submitting} className="h-8 bg-indigo-600 hover:bg-indigo-700">
                             {submitting ? "..." : "Post"}
                         </Button>
-                    </div>
-                </form>
+                      </div>
+                   </form>
+                 )}
+                </>
               ) : (
-                <div className="text-xs text-center p-2 bg-slate-50 rounded">
-                    Log in to add a review.
+                <div className="text-xs text-center p-2 bg-slate-50 rounded border border-dashed">
+                    <Link to="/login" className="text-indigo-600 underline">Log in</Link> to rate.
                 </div>
               )}
+            </CardContent>
+          </Card>
 
+          {/* 2. Other Reviews Card */}
+          <Card className="rounded-2xl">
+            <CardContent className="p-4 space-y-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-sm font-semibold">Reviews</h2>
+                <span className="text-xs text-muted-foreground">{otherReviews.length}</span>
+              </div>
+              
+              <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+                {otherReviews.length === 0 && <p className="text-xs text-muted-foreground italic">No other reviews yet.</p>}
+                
+                {otherReviews.map((r) => {
+                  const reviewUser = users.find((u) => u.id === r.user_id);
+                  const ratingVal = r.rating || r.data?.rating; 
+
+                  return (
+                    <div key={r.id || Math.random()} className="border rounded-xl p-3 text-xs bg-white hover:border-slate-300 transition">
+                      <div className="flex justify-between items-start mb-1">
+                        <div className="font-medium text-slate-800">
+                            {reviewUser?.username || "Anonymous"}
+                        </div>
+                        {ratingVal ? (
+                           <div className="text-amber-400 text-[10px]">
+                              {"★".repeat(ratingVal)}<span className="text-slate-200">{"★".repeat(5-ratingVal)}</span>
+                           </div>
+                        ) : null}
+                      </div>
+                      <p className="text-slate-600">{r.review || r.comment || ""}</p>
+                    </div>
+                  );
+                })}
+              </div>
             </CardContent>
           </Card>
         </div>
