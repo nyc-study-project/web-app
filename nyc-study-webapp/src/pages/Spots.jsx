@@ -71,6 +71,7 @@ export default function Spots() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
+  const [ratings, setRatings] = useState({});
 
   const [search, setSearch] = useState("");
   const [filterOpenNow, setFilterOpenNow] = useState(false);
@@ -96,6 +97,22 @@ export default function Spots() {
 
         const normalized = rawList.map(normalizeSpot);
         setSpots(normalized);
+
+        const ids = normalized.map((s) => s.id);
+        if (ids.length > 0) {
+          const GATEWAY_URL = "https://composite-gateway-642518168067.us-east1.run.app";
+          
+          fetch(`${GATEWAY_URL}/composite/ratings/batch`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ids }),
+          })
+            .then((res) => res.json())
+            .then((data) => setRatings(data))
+            .catch((e) => console.error("Failed to load ratings:", e));
+        }
+
+
       } catch (err) {
         console.error("Failed to load spots:", err);
         setError("Could not load study spots. Please try again.");
@@ -341,6 +358,21 @@ export default function Spots() {
                           <span className="font-medium truncate">
                             {s.name}
                           </span>
+
+                          <div className="flex items-center gap-1 text-xs mb-0.5">
+    {ratings[s.id] ? (
+      <>
+        <span className="text-amber-500">★</span>
+        <span className="font-semibold text-slate-700">
+          {Number(ratings[s.id]).toFixed(1)}
+        </span>
+        <span className="text-muted-foreground/50 font-normal">/ 5</span>
+      </>
+    ) : (
+      <span className="text-muted-foreground/50 italic text-[10px]">No ratings</span>
+    )}
+  </div>
+
                           <span className="text-xs text-muted-foreground truncate">
                             {s.address.street}, {s.address.city}
                           </span>
