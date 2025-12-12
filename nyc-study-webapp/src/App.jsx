@@ -284,7 +284,7 @@ function Home({ config }) {
 
           <div className="mt-6 flex flex-wrap gap-3">
             <Link to="/spots">
-              <Button className="shadow-sm" variant="outline">Browse study spots</Button>
+              <Button className="shadow-sm">Browse study spots</Button>
             </Link>
             <Link to="/services">
               <Button variant="outline">View service health</Button>
@@ -370,9 +370,7 @@ function Services({ config }) {
 
   const doPing = async (idx) => {
     setLoadingIndex(idx);
-    const svc = config.microservices[idx];
-    const healthUrl = svc.name.toLowerCase().includes("user")? `${COMPOSITE_BASE}/health`: joinUrl(svc.baseUrl, "/health");
-    const result = await pingHealth(healthUrl);
+    const result = await pingHealth(config.microservices[idx].baseUrl);
     setStatuses((prev) =>
       prev.map((s, i) => (i === idx ? result : s))
     );
@@ -441,7 +439,6 @@ function Services({ config }) {
                   onClick={() => doPing(idx)}
                   disabled={loadingIndex === idx}
                   className="text-xs"
-                  variant="outline"
                 >
                   {loadingIndex === idx ? (
                     <>
