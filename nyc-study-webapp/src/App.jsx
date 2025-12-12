@@ -53,6 +53,8 @@ const defaultConfig = {
     {
       name: "User Management (FastAPI, VM)",
       baseUrl: "http://34.139.134.144:8002",
+      healthOverride:
+        "https://composite-gateway-642518168067.us-east1.run.app/proxy/user/health",
       notes: "FastAPI on GCE VM + Cloud SQL MySQL",
       endpoints: [
         { label: "/health", path: "/health" },
@@ -146,14 +148,16 @@ function joinUrl(base, path = "") {
   }`;
 }
 
-async function pingHealth(baseUrl) {
+async function pingHealth(baseUrl, override) {
+  const url = override ?? joinUrl(baseUrl, "/health");
   try {
-    const res = await fetch(joinUrl(baseUrl, "/health"));
+    const res = await fetch(url);
     return { status: res.ok ? "ok" : "fail", code: res.status };
   } catch {
     return { status: "fail", code: "ERR" };
   }
 }
+
 
 
 /* ----------------------------------------------------------
@@ -370,7 +374,10 @@ function Services({ config }) {
 
   const doPing = async (idx) => {
     setLoadingIndex(idx);
-    const result = await pingHealth(config.microservices[idx].baseUrl);
+    const result = await pingHealth(
+      config.microservices[idx].baseUrl,
+      config.microservices[idx].healthOverride
+    );
     setStatuses((prev) =>
       prev.map((s, i) => (i === idx ? result : s))
     );
